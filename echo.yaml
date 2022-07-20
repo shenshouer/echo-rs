@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: echo
+  name: echo
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+      - env:
+        - name: RUST_LOG
+          value: debug
+        image: hub.pri.ibanyu.com/devops/echo-rs:0.1.0
+        imagePullPolicy: IfNotPresent
+        name: echo
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+      nodeSelector:
+        role: devops
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: echo
+  name: echo
+  namespace: devops
+spec:
+  ports:
+  - name: http
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: echo
+  type: ClusterIP
